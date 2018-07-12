@@ -19,5 +19,17 @@
         app:layout_constraintRight_toRightOf="parent"
         />
 
+    <Button
+        android:id="@+id/nextbtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tvd"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="109dp"
+        android:text="Go to Map"
+        tools:layout_editor_absoluteX="148dp"
+        tools:layout_editor_absoluteY="266dp" />
+
+
 
 </android.support.constraint.ConstraintLayout>
