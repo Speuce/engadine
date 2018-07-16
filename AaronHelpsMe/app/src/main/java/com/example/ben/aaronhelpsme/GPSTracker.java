@@ -1,5 +1,4 @@
 package com.example.ben.aaronhelpsme;
-
 import android.*;
 import android.Manifest;
 import android.app.Service;

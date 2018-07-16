@@ -1,15 +1,26 @@
 package com.example.ben.aaronhelpsme;
-
+import android.content.Intent;
+import android.graphics.Color;
 import android.location.Location;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
 
+import com.google.android.gms.common.oob.SignUp;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polygon;
+import com.google.android.gms.maps.model.PolygonOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -18,6 +29,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GPSTracker gpsTracker;
     private Location mLocation;
     double latitude, longitude;
+    Button addMarker;
+    boolean mark = false;
+    String newString, disaster, comment;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +50,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        if (savedInstanceState == null) {
+            Bundle extras = getIntent().getExtras();
+            if(extras == null) {
+                newString= null;
+            } else {
+                newString= extras.getString("STRING_I_NEED");
+                disaster = extras.getString("DISASTER");
+                comment = extras.getString("COMMENT");
+            }
+        } else {
+            newString= (String) savedInstanceState.getSerializable("STRING_I_NEED");
+            disaster= (String) savedInstanceState.getSerializable("DISASTER");
+
+
+        }
     }
 
 
@@ -42,8 +73,65 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap = googleMap;
 
         // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(latitude, longitude);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("I'm here..."));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        final LatLng sydney = new LatLng(latitude, longitude);
+        float zoomLevel = 14.0f; //This goes up to 21
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, zoomLevel));
+
+        addMarker = (Button) findViewById(R.id.add);
+//        MarkerOptions markerOpt = new MarkerOptions();
+
+
+        addMarker.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Intent in = new Intent(MapsActivity.this, MarkerAdd.class);
+                startActivity(in);
+            }
+        });
+
+        if(newString!=null){
+
+            if(disaster.equals("flood")) {
+                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)).snippet(comment));
+            } else if(disaster.equals("fire")){
+                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)).snippet(comment));
+            } else if(disaster.equals("earthquake")){
+                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)).snippet(comment));
+            } else if(disaster.equals("accident")){
+                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)).snippet(comment));
+            }else if(disaster.equals("icestorm")){
+                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)).snippet(comment));
+            }else if(disaster.equals("tornado")){
+                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET)).snippet(comment));
+            }else if(disaster.equals("hurricane")){
+                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA)).snippet(comment));
+            }else if(disaster.equals("hailstorm")){
+                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)).snippet(comment));
+            }else if(disaster.equals("windstorm")){
+                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE)).snippet(comment));
+            }else if(disaster.equals("volcano")){
+                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)).snippet(comment));
+            }else if(disaster.equals("avalanche")){
+                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW)).snippet(comment));
+            }else if(disaster.equals("tsunami")){
+                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)).snippet(comment));
+            }else if(disaster.equals("riot")){
+               mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)).snippet(comment));
+               drawShape();
+            }
+            System.out.print(disaster);
+
+        }
+
+    }
+
+    public  void drawShape(){
+        Polygon polygon = mMap.addPolygon(new PolygonOptions()
+                .add(new LatLng(latitude+0.01, longitude), new LatLng(latitude, longitude+0.01), new LatLng(latitude-0.01, longitude), new LatLng(latitude, longitude-0.01))
+                .strokeColor(Color.RED)
+                .fillColor(Color.BLUE));
+
+
     }
 }

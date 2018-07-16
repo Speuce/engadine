@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".LogIn">
-
+    tools:context=".LogIn"
+    android:background="@drawable/background" >
 
 
     <EditText
@@ -17,6 +17,8 @@
         android:layout_marginTop="61dp"
         android:ems="10"
         android:hint="Username"
+        android:backgroundTint="#000000"
+        android:textColorHint="#000000"
         android:inputType="text"
         tools:layout_editor_absoluteX="84dp"
         tools:layout_editor_absoluteY="53dp" />
@@ -29,6 +31,8 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="32dp"
         android:ems="10"
+        android:backgroundTint="#000000"
+        android:textColorHint="#000000"
         android:hint="Password"
         android:inputType="textPassword"
         tools:layout_editor_absoluteX="84dp"

@@ -1,0 +1,101 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="#FFFFFF"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+
+<RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/background">
+    <RadioButton android:id="@+id/flood"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Flood"
+        android:onClick="onRadioButtonClicked"/>
+    <RadioButton android:id="@+id/fire"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Fire"
+        android:onClick="onRadioButtonClicked"/>
+    <RadioButton android:id="@+id/icestorm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ice Storm"
+        android:onClick="onRadioButtonClicked"/>
+    <RadioButton android:id="@+id/riot"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Riot"
+        android:onClick="onRadioButtonClicked"/>
+    <RadioButton android:id="@+id/accident"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Accident"
+        android:onClick="onRadioButtonClicked"/>
+    <RadioButton android:id="@+id/tornado"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tornado"
+        android:onClick="onRadioButtonClicked"/>
+    <RadioButton android:id="@+id/hurricane"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hurricane"
+        android:onClick="onRadioButtonClicked"/>
+    <RadioButton android:id="@+id/hailstorm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hail Storm"
+        android:onClick="onRadioButtonClicked"/>
+    <RadioButton android:id="@+id/windstorm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Wind Storm"
+        android:onClick="onRadioButtonClicked"/>
+    <RadioButton android:id="@+id/earthquake"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Earthquake"
+        android:onClick="onRadioButtonClicked"/>
+    <RadioButton android:id="@+id/volcano"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Volcano"
+        android:onClick="onRadioButtonClicked"/>
+    <RadioButton android:id="@+id/avalanche"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Avalanche"
+        android:onClick="onRadioButtonClicked"/>
+    <RadioButton android:id="@+id/tsunami"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tsunami"
+        android:onClick="onRadioButtonClicked"/>
+    </RadioGroup>
+
+    <EditText
+        android:id="@+id/comment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="450dp"
+        android:ems="10"
+        android:backgroundTint="#000000"
+        android:textColorHint="#000000"
+        android:inputType="text"
+        android:hint="Additional Comments"
+/>
+
+    <Button
+        android:id="@+id/add"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Add Marker"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="500dp"
+        />
+</RelativeLayout>
