@@ -1,6 +1,7 @@
 package com.example.ben.aaronhelpsme;
 
 import android.content.Intent;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputType;
@@ -12,7 +13,7 @@ import android.widget.Button;
 
 public class MarkerAdd extends AppCompatActivity {
 
-    Button map;
+    Button map, camera;
     EditText comment;
     boolean done = false;
     String strName = null;
@@ -48,10 +49,6 @@ public class MarkerAdd extends AppCompatActivity {
                 if (checked)
                     disaster = "icestorm";
                     break;
-            case R.id.hailstorm:
-                if (checked)
-                    disaster = "hailstorm";
-                break;
             case R.id.windstorm:
                 if (checked)
                     disaster = "windstorm";
@@ -96,6 +93,7 @@ public class MarkerAdd extends AppCompatActivity {
        map = (Button) findViewById(R.id.add);
 
         comment = (EditText) findViewById(R.id.comment);
+        camera = (Button) findViewById(R.id.picture);
 
 
         map.setOnClickListener(new View.OnClickListener() {
@@ -112,13 +110,22 @@ public class MarkerAdd extends AppCompatActivity {
                 if(disaster!=null)
                     startActivity(i);
 
-
-
-
-
             }
         });
+//        camera.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//
+//                Intent j = new Intent(MarkerAdd.this, CameraActivity.class);
+//
+//                    startActivity(j);
+//
+//            }
+//        });
+
 
     }
+
+
 
 }

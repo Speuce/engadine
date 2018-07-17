@@ -9,7 +9,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="@drawable/background">
+    android:background="@drawable/background"
+    >
     <RadioButton android:id="@+id/flood"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -44,11 +45,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Hurricane"
-        android:onClick="onRadioButtonClicked"/>
-    <RadioButton android:id="@+id/hailstorm"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hail Storm"
         android:onClick="onRadioButtonClicked"/>
     <RadioButton android:id="@+id/windstorm"
         android:layout_width="wrap_content"
@@ -98,4 +94,13 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="500dp"
         />
+    <Button
+        android:id="@+id/picture"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Add Picture"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="400dp"
+        />
+
 </RelativeLayout>

@@ -1,26 +1,23 @@
 package com.example.ben.aaronhelpsme;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.location.Location;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
-import com.google.android.gms.common.oob.SignUp;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
-import com.google.android.gms.maps.model.Polyline;
-import com.google.android.gms.maps.model.PolylineOptions;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -89,36 +86,83 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 startActivity(in);
             }
         });
-
         if(newString!=null){
 
             if(disaster.equals("flood")) {
-                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)).snippet(comment));
+                BitmapDrawable bitmapdraw = (BitmapDrawable)getResources().getDrawable((R.drawable.flood));
+                Bitmap b = bitmapdraw.getBitmap();
+                Bitmap smallMarker = Bitmap.createScaledBitmap(b,84, 84, false);
+                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.
+                        fromBitmap(smallMarker)).snippet(comment));
+                mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsActivity.this));
             } else if(disaster.equals("fire")){
-                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)).snippet(comment));
+                BitmapDrawable bitmapdraw = (BitmapDrawable)getResources().getDrawable(R.drawable.fire);
+                Bitmap b = bitmapdraw.getBitmap();
+                Bitmap smallMarker = Bitmap.createScaledBitmap(b,84, 84, false);
+                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.
+                        fromBitmap(smallMarker)).snippet(comment));
+                mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsActivity.this));
+
             } else if(disaster.equals("earthquake")){
-                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)).snippet(comment));
+                BitmapDrawable bitmapdraw = (BitmapDrawable)getResources().getDrawable(R.drawable.earthquake);
+                Bitmap b = bitmapdraw.getBitmap();
+                Bitmap smallMarker = Bitmap.createScaledBitmap(b,84, 84, false);
+                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.
+                        fromBitmap(smallMarker)).snippet(comment));
+                mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsActivity.this));
+
             } else if(disaster.equals("accident")){
-                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)).snippet(comment));
+                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.
+                        defaultMarker(BitmapDescriptorFactory.HUE_GREEN)).snippet(comment));
+                mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsActivity.this));
+
             }else if(disaster.equals("icestorm")){
-                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)).snippet(comment));
+                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.
+                        defaultMarker(BitmapDescriptorFactory.HUE_CYAN)).snippet(comment));
+                mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsActivity.this));
+
             }else if(disaster.equals("tornado")){
-                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET)).snippet(comment));
+                BitmapDrawable bitmapdraw = (BitmapDrawable)getResources().getDrawable((R.drawable.tornado));
+                Bitmap b = bitmapdraw.getBitmap();
+                Bitmap smallMarker = Bitmap.createScaledBitmap(b,84, 84, false);
+                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.
+                        fromBitmap(smallMarker)).snippet(comment));
+                mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsActivity.this));
+
             }else if(disaster.equals("hurricane")){
-                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA)).snippet(comment));
-            }else if(disaster.equals("hailstorm")){
-                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)).snippet(comment));
+                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.
+                        defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA)).snippet(comment));
+                mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsActivity.this));
             }else if(disaster.equals("windstorm")){
-                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE)).snippet(comment));
+                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.
+                        defaultMarker(BitmapDescriptorFactory.HUE_ROSE)).snippet(comment));
+                mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsActivity.this));
             }else if(disaster.equals("volcano")){
-                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)).snippet(comment));
+                BitmapDrawable bitmapdraw = (BitmapDrawable)getResources().getDrawable(R.drawable.lcano);
+                Bitmap b = bitmapdraw.getBitmap();
+                Bitmap smallMarker = Bitmap.createScaledBitmap(b,84, 84, false);
+                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.
+                        fromBitmap(smallMarker)).snippet(comment));
+                mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsActivity.this));
             }else if(disaster.equals("avalanche")){
-                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW)).snippet(comment));
+                BitmapDrawable bitmapdraw = (BitmapDrawable)getResources().getDrawable((R.drawable.avalanche));
+                Bitmap b = bitmapdraw.getBitmap();
+                Bitmap smallMarker = Bitmap.createScaledBitmap(b,84, 84, false);
+                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.
+                        fromBitmap(smallMarker)).snippet(comment));
+                mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsActivity.this));
             }else if(disaster.equals("tsunami")){
-                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)).snippet(comment));
+                BitmapDrawable bitmapdraw = (BitmapDrawable)getResources().getDrawable(R.drawable.tsunami);
+                Bitmap b = bitmapdraw.getBitmap();
+                Bitmap smallMarker = Bitmap.createScaledBitmap(b,84, 84, false);
+                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.
+                        fromBitmap(smallMarker)).snippet(comment));
+                mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsActivity.this));
             }else if(disaster.equals("riot")){
-               mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)).snippet(comment));
-               drawShape();
+               mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.
+                       defaultMarker(BitmapDescriptorFactory.HUE_GREEN)).snippet(comment));
+                mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsActivity.this));
+                drawShape();
             }
             System.out.print(disaster);
 
@@ -128,7 +172,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public  void drawShape(){
         Polygon polygon = mMap.addPolygon(new PolygonOptions()
-                .add(new LatLng(latitude+0.01, longitude), new LatLng(latitude, longitude+0.01), new LatLng(latitude-0.01, longitude), new LatLng(latitude, longitude-0.01))
+                .add(new LatLng(latitude+0.01, longitude), new LatLng(latitude, longitude+0.01), new LatLng(latitude,longitude), new LatLng(latitude-0.01, longitude), new LatLng(latitude, longitude-0.01))
                 .strokeColor(Color.RED)
                 .fillColor(Color.BLUE));
 
