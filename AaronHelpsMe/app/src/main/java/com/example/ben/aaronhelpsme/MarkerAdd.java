@@ -1,14 +1,21 @@
 package com.example.ben.aaronhelpsme;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.Button;
+
+import java.io.ByteArrayOutputStream;
 
 
 public class MarkerAdd extends AppCompatActivity {
@@ -19,7 +26,11 @@ public class MarkerAdd extends AppCompatActivity {
     String strName = null;
     String disaster = null;
     String commentS = null;
-
+    private ImageView imageView;
+    private static final int MY_CAMERA_PERMISSION_CODE = 100;
+    private static final int CAMERA_REQUEST = 1888;
+    Bitmap imageBitmap;
+    Intent i;
 
 
 
@@ -90,7 +101,7 @@ public class MarkerAdd extends AppCompatActivity {
 
     public void addListenerOnButton() {
 
-       map = (Button) findViewById(R.id.add);
+        map = (Button) findViewById(R.id.add);
 
         comment = (EditText) findViewById(R.id.comment);
         camera = (Button) findViewById(R.id.picture);
@@ -100,30 +111,45 @@ public class MarkerAdd extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                Intent i = new Intent(MarkerAdd.this, MapsActivity.class);
+                i = new Intent(MarkerAdd.this, MapsActivity.class);
                 commentS = comment.getText().toString();
                 strName = "yes";
                 i.putExtra("STRING_I_NEED", strName);
                 i.putExtra("DISASTER", disaster);
                 i.putExtra("COMMENT", commentS);
 
-                if(disaster!=null)
+                i.putExtra("IMAGE",imageBitmap);
+                if (disaster != null)
                     startActivity(i);
 
             }
         });
-//        camera.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//
-//                Intent j = new Intent(MarkerAdd.this, CameraActivity.class);
-//
-//                    startActivity(j);
-//
-//            }
-//        });
+        camera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if (checkSelfPermission(Manifest.permission.CAMERA)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(new String[]{Manifest.permission.CAMERA},
+                            MY_CAMERA_PERMISSION_CODE);
+                } else {
+                    Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+
+                    startActivityForResult(cameraIntent, CAMERA_REQUEST);
+
+                }
+            }
+        });
+    }
 
 
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
+            Bundle extras = data.getExtras();
+            imageBitmap = (Bitmap) extras.get("data");
+
+
+        }
     }
 
 
