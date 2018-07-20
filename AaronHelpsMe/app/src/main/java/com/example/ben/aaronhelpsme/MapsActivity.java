@@ -13,6 +13,7 @@ import android.widget.ImageView;
 import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
 
 //delete later
+import java.sql.Connection;
 import java.util.Random;
 
 import java.util.*;
@@ -48,6 +49,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
+        ConnectionManager.getConnection();
+
         gpsTracker = new GPSTracker(getApplicationContext());
         mLocation = gpsTracker.getLocation();
 
@@ -77,13 +80,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     }
+    public BitmapDescriptor getDrawable(String disaster){
+        switch(disaster){
+            case "flood":
+                return (BitmapDrawable)getResources().getDrawable((R.drawable.flood));
+            case "fire" :
+                return (BitmapDrawable)getResources().getDrawable(R.drawable.fire);
+            default:
+                return null;
+        }
 
+    }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-
+        //DRAW MARKERS
         final LatLng sydney = new LatLng(latitude, longitude);
         ArrayList <Point> flood = new ArrayList<>();
 
@@ -109,6 +122,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 BitmapDrawable bitmapdraw = (BitmapDrawable)getResources().getDrawable((R.drawable.flood));
                 Bitmap b = bitmapdraw.getBitmap();
                 Bitmap smallMarker = Bitmap.createScaledBitmap(b,84, 84, false);
+
                 mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.
                         fromBitmap(smallMarker)).snippet(comment));
                 mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsActivity.this));

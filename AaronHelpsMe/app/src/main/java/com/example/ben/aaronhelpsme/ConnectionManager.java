@@ -28,14 +28,24 @@ public class ConnectionManager{
 	private long killTask;
 	private Map<Integer, Flag> cache;
 	public static final long flagLifeTime = 1000L * 60L * 60L * 24L;
-	public ConnectionManager(CodeStuff stuff) {
-		this.stuff = stuff;
+
+	private static ConnectionManager con = null;
+	public ConnectionManager() {
+		//this.stuff = stuff;
 		cache = this.lruCache(100);
 		taskQueue = new LinkedBlockingQueue<Runnable>();
 		this.pool = Executors.newCachedThreadPool();
 		connectToServer();
 		lastComm = System.currentTimeMillis();
 		this.pool.execute(this.getCheckTask());
+	}
+	public static ConnectionManager getConnection(){
+		if(con != null){
+			return con;
+		}else{
+			con = new ConnectionManager();
+			return con;
+		}
 	}
 	private Runnable getCheckTask() {
 		return new Runnable() {
@@ -97,8 +107,13 @@ public class ConnectionManager{
 			e.printStackTrace();
 		}
 	}
-	
-	public void getFlags() {
+	public boolean hasFlags(){
+		return !cache.isEmpty();
+	}
+	public java.util.Collection<Flag> getFlags(){
+		return cache.values();
+	}
+	public void getFlags(Runnable done) {
 		Runnable r = new Runnable() {
 
 			@Override

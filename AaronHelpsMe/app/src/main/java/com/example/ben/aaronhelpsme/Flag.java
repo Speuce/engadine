@@ -1,6 +1,9 @@
 package com.example.ben.aaronhelpsme;
 
 import android.graphics.*;
+
+import com.google.android.gms.maps.model.MarkerOptions;
+
 import java.nio.ByteBuffer;
 
 public class Flag {
@@ -10,6 +13,10 @@ public class Flag {
 	private byte[] img;
 	private boolean isntSet;
 	private long created;
+	private MarkerOptions m;
+
+
+
 	public Flag(double lat, double lon, int veri, int id, String user, byte[] img, String desc, long created) {
 		this.lat = lat;
 		this.lon = lon;
@@ -26,6 +33,9 @@ public class Flag {
 		this.user = user;
 		this.desc = desc;
 		this.created = created;
+	}
+	public MarkerOptions getMarker(){
+		return this.m;
 	}
 	public boolean isntSet() {
 		return this.isntSet;
