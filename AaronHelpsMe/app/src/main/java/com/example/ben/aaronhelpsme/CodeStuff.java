@@ -19,16 +19,6 @@ public class CodeStuff {
 		getCon().appClosed();
 	}
 	//CALL THIS METHOD TO REQUEST AN IMAGE FROM A FLAG
-	public void requestImage(Flag f) {
-		getCon().getImage(f.getId());
-	}
-	
-	public void imageReceived(Flag f, Bitmap b) {
-
-	}
-	public void flagExpired(Flag f) {
-		//INSERT CODE FOR WHEN FLAG IS DELETED/EXPIRED
-	}
 	public void userVerified() {
 		//INSERT CODE FOR WHEN USER VERIFIED AND LOGGED IN
 	}

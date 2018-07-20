@@ -30,37 +30,37 @@ public class ConnectionManager{
 	public static final long flagLifeTime = 1000L * 60L * 60L * 24L;
 	public ConnectionManager(CodeStuff stuff) {
 		this.stuff = stuff;
-		cache = this.lruCache(100);
+		//cache = this.lruCache(100);
 		taskQueue = new LinkedBlockingQueue<Runnable>();
 		this.pool = Executors.newCachedThreadPool();
 		connectToServer();
 		lastComm = System.currentTimeMillis();
-		this.pool.execute(this.getCheckTask());
+		//this.pool.execute(this.getCheckTask());
 	}
-	private Runnable getCheckTask() {
-		return new Runnable() {
-
-			@Override
-			public void run() {
-				while(true) {
-					for(Integer i: cache.keySet()) {
-						Flag f = cache.get(i);
-						if(f.getCreated() + flagLifeTime >= System.currentTimeMillis()) {
-							stuff.flagExpired(f);
-							cache.remove(i);
-						}
-					}
-					getFlags();
-					try {
-						Thread.sleep(1000L*60L*2L);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-			}
-		};
-	}
+//	private Runnable getCheckTask() {
+//		return new Runnable() {
+//
+//			@Override
+//			public void run() {
+//				while(true) {
+//					for(Integer i: cache.keySet()) {
+//						Flag f = cache.get(i);
+//						if(f.getCreated() + flagLifeTime >= System.currentTimeMillis()) {
+//							stuff.flagExpired(f);
+//							cache.remove(i);
+//						}
+//					}
+//					getFlags();
+//					try {
+//						Thread.sleep(1000L*60L*2L);
+//					} catch (InterruptedException e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
+//				}
+//			}
+//		};
+//	}
 	private Runnable getRunner() {
 		return new Runnable() {
 
@@ -170,50 +170,50 @@ public class ConnectionManager{
 		};
 		this.addTask(r);
 	}
-	public void getImage(final int id) {
-		if(this.cache.containsKey(Integer.valueOf(id))) {
-			if(this.cache.get(Integer.valueOf(id)).isntSet()) {
-				Runnable r = new Runnable() {
-
-					@Override
-					public void run() {
-						try {
-							PrintWriter out = new PrintWriter(server.getOutputStream());
-							out.println("GETIMG " + id);
-							out.close();
-							BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
-							while(!in.ready()) {}
-							String st = in.readLine();
-							in.close();
-							if(st.equalsIgnoreCase("null")) {
-								System.out.print("got null img from server");
-							}else {
-								String[] args = st.split(" ");
-								int size = Integer.parseInt(args[1]);
-								byte[] img = new byte[size];
-								server.getInputStream().read(img);
-								cache.get(id).setImg(img);
-								stuff.imageReceived(cache.get(Integer.valueOf(id)), Flag.getBitmap(img));
-								img = null;
-								//TODO call image received
-							}
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						
-					}
-				};
-				this.addTask(r);
-			}else {
-				Flag f = cache.get(id);
-				stuff.imageReceived(cache.get(Integer.valueOf(id)), Flag.getBitmap(f.getImg()));
-			}
-			
-		}else{
-			System.out.println("Tried to find an image for a flag thats not there.");
-		}
-	}
+//	public void getImage(final int id) {
+//		if(this.cache.containsKey(Integer.valueOf(id))) {
+//			if(this.cache.get(Integer.valueOf(id)).isntSet()) {
+//				Runnable r = new Runnable() {
+//
+//					@Override
+//					public void run() {
+//						try {
+//							PrintWriter out = new PrintWriter(server.getOutputStream());
+//							out.println("GETIMG " + id);
+//							out.close();
+//							BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
+//							while(!in.ready()) {}
+//							String st = in.readLine();
+//							in.close();
+//							if(st.equalsIgnoreCase("null")) {
+//								System.out.print("got null img from server");
+//							}else {
+//								String[] args = st.split(" ");
+//								int size = Integer.parseInt(args[1]);
+//								byte[] img = new byte[size];
+//								server.getInputStream().read(img);
+//								cache.get(id).setImg(img);
+//								//stuff.imageReceived(cache.get(Integer.valueOf(id)), Flag.getBitmap(img));
+//								img = null;
+//								//TODO call image received
+//							}
+//						} catch (IOException e) {
+//							// TODO Auto-generated catch block
+//							e.printStackTrace();
+//						}
+//
+//					}
+//				};
+//				this.addTask(r);
+//			}else {
+//				Flag f = cache.get(id);
+//				//stuff.imageReceived(cache.get(Integer.valueOf(id)), Flag.getBitmap(f.getImg()));
+//			}
+//
+//		}else{
+//			System.out.println("Tried to find an image for a flag thats not there.");
+//		}
+//	}
 	private void connectToServer() {
 		Runnable r = new Runnable() {
 
