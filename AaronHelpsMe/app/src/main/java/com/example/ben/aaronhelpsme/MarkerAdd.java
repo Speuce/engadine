@@ -112,13 +112,19 @@ public class MarkerAdd extends AppCompatActivity {
             public void onClick(View view) {
 
                 i = new Intent(MarkerAdd.this, MapsActivity.class);
+
+                //NEW FLAGGG
+                Bundle extras = getIntent().getExtras();
+
+                CodeStuff.getCon().newFlag(ConnectionManager.user, disaster + " " + commentS,
+                        extras.getDouble("lat"), extras.getDouble("lon"),  Flag.getByteArray(imageBitmap));
                 commentS = comment.getText().toString();
                 strName = "yes";
-                i.putExtra("STRING_I_NEED", strName);
-                i.putExtra("DISASTER", disaster);
-                i.putExtra("COMMENT", commentS);
-
-                i.putExtra("IMAGE",imageBitmap);
+//                i.putExtra("STRING_I_NEED", strName);
+//                i.putExtra("DISASTER", disaster);
+//                i.putExtra("COMMENT", commentS);
+//
+//                i.putExtra("IMAGE",imageBitmap);
                 if (disaster != null)
                     startActivity(i);
 

@@ -1,66 +1,91 @@
 package com.example.ben.aaronhelpsme;
 
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.lang.ref.WeakReference;
 
 public class ConnectionManager{
 	private Socket server;
-	private String hostname = "127.0.0.1";
+	private String hostname = "142.44.210.76";
 	private int port = 1255;
 	private long lastComm;
 	private boolean appClosed = false;
 	private static final long commrec = 1000L * 60L;
-	private CodeStuff stuff;
 	private ExecutorService pool;
 	private BlockingQueue<Runnable> taskQueue;
 	private Future currentTask = null;
-	private final long executionTime = 1000L * 30L;
+	private final long executionTime = 1000L * 15L;
 	private long killTask;
 	private Map<Integer, Flag> cache;
+
 	public static final long flagLifeTime = 1000L * 60L * 60L * 24L;
-	public ConnectionManager(CodeStuff stuff) {
-		this.stuff = stuff;
-		//cache = this.lruCache(100);
+
+	public static String user;
+
+	public ConnectionManager() {
+		cache = this.lruCache(100);
 		taskQueue = new LinkedBlockingQueue<Runnable>();
 		this.pool = Executors.newCachedThreadPool();
 		connectToServer();
 		lastComm = System.currentTimeMillis();
-		//this.pool.execute(this.getCheckTask());
+
+		System.out.println("Attempting to connect to server.");
 	}
-//	private Runnable getCheckTask() {
-//		return new Runnable() {
-//
-//			@Override
-//			public void run() {
-//				while(true) {
-//					for(Integer i: cache.keySet()) {
-//						Flag f = cache.get(i);
-//						if(f.getCreated() + flagLifeTime >= System.currentTimeMillis()) {
-//							stuff.flagExpired(f);
-//							cache.remove(i);
-//						}
-//					}
-//					getFlags();
-//					try {
-//						Thread.sleep(1000L*60L*2L);
-//					} catch (InterruptedException e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
-//				}
-//			}
-//		};
-//	}
+	private static WeakReference<MapsActivity> map;
+	public static void updateActivity(MapsActivity activity) {
+		map = new WeakReference<MapsActivity>(activity);
+	}
+	public static WeakReference<MapsActivity> getMaps(){
+		return map;
+	}
+	public Flag getFlag(Marker m){
+		for(Flag f: cache.values()){
+			if(f.getMarker() == m){
+				return f;
+			}
+		}
+		return null;
+	}
+	private Runnable getCheckTask() {
+		return new Runnable() {
+
+			@Override
+			public void run() {
+				while(true) {
+					for(Integer i: cache.keySet()) {
+						Flag f = cache.get(i);
+						if(f.getCreated() + flagLifeTime >= System.currentTimeMillis()) {
+							//CodeStuff.flagExpired(f);
+							cache.remove(i);
+						}
+					}
+					getFlags();
+					try {
+						Thread.sleep(1000L*60L*2L);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		};
+	}
 	private Runnable getRunner() {
 		return new Runnable() {
 
@@ -70,9 +95,11 @@ public class ConnectionManager{
 					if(currentTask == null && !taskQueue.isEmpty()) {
 						currentTask = pool.submit(taskQueue.poll());
 						killTask = System.currentTimeMillis() + executionTime;
+						System.out.println("Started task.");
 					}else if(currentTask != null){
 						if(currentTask.isDone()) {
 							currentTask = null;
+							System.out.println("Finished task.");
 						}else if(System.currentTimeMillis() > killTask) {
 							currentTask.cancel(true);
 							currentTask = null;
@@ -97,20 +124,36 @@ public class ConnectionManager{
 			e.printStackTrace();
 		}
 	}
-	
-	public void getFlags() {
+	public void getFlags(){
+		if(!this.cache.isEmpty()){
+			CodeStuff.FlagsLoaded(cache.values());
+		}else{
+			loadFlags(true);
+		}
+	}
+	public void loadFlags(boolean callAfter) {
+	    System.out.println("LOAD FLAGS");
 		Runnable r = new Runnable() {
 
 			@Override
 			public void run() {
 				try {
+
 					PrintWriter out = new PrintWriter(server.getOutputStream());
 					out.println("FLAGS");
-					out.close();
+					out.flush();
+					out = null;
 					BufferedReader read = new BufferedReader(new InputStreamReader(server.getInputStream()));
+					List<Flag> flas = new ArrayList<Flag>();
 					while(!read.ready()) {}
 					String ret = read.readLine();
+					System.out.println("GOt falgs: " + ret);
 					String[] args = ret.split(":");
+					int size = Integer.parseInt(args[0]);
+					if(size == 0){
+						System.out.println("There are no flags");
+						return;
+					}
 					if(args.length == 2) {
 						int length = Integer.parseInt(args[0]);
 						String[] flags = args[1].split("|");
@@ -121,12 +164,24 @@ public class ConnectionManager{
 							String desc = data[2].replaceAll("_", " ");
 							String user = data[3];
 							long l = Long.parseLong(data[4]);
-							int id = Integer.parseInt(data[5]);	
-							cache.put(Integer.valueOf(id), new Flag(lat, lon, user, desc, l));
+							int id = Integer.parseInt(data[5]);
+							Flag fl = new Flag(lat, lon, user, desc, l);
+							//final LatLng sydney = new LatLng(lat, lon);
+
+//							fl.setMarker(new MarkerOptions().position(sydney).title(fl.getDisaster())
+//									.icon(getIcon(fl.getDisaster()))
+//									.snippet(fl.getComment()));
+							flas.add(fl);
+							cache.put(Integer.valueOf(id), fl);
 						}
-						
+						CodeStuff.FlagsLoaded(flas);
+						//read.
+						read = null;
+						System.out.println("Finished getting flags");
+						return;
 					}else {
 						System.out.print("Got weird response from server for requesting flags.");
+						return;
 					}
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
@@ -147,18 +202,21 @@ public class ConnectionManager{
 					PrintWriter out = new PrintWriter(server.getOutputStream());
 					out.println("NF " + username + " " + lat + " " + lon + " " + description.replaceAll("\\s", "_"));
 					//out.close();
+
 					BufferedReader read = new BufferedReader(new InputStreamReader(server.getInputStream()));
 					//BE CAREFUL DO SECURE EXECUTION TODO
 					while(!read.ready()) {}
 					if(read.readLine().equalsIgnoreCase("REQIMG")) {
 						out.print("IMG " + img.length);
-						out.close();
+						out.flush();
+						out = null;
 						server.getOutputStream().write(img);
 						System.out.println("Sent image sucessfully.");
 						return;
 					}else {
 						System.out.println("WHYY IS SERVER DOING THIS?!?");
-						out.close();
+						out.flush();
+						out = null;
 					}
 				
 				}catch(Exception e) {
@@ -170,50 +228,52 @@ public class ConnectionManager{
 		};
 		this.addTask(r);
 	}
-//	public void getImage(final int id) {
-//		if(this.cache.containsKey(Integer.valueOf(id))) {
-//			if(this.cache.get(Integer.valueOf(id)).isntSet()) {
-//				Runnable r = new Runnable() {
-//
-//					@Override
-//					public void run() {
-//						try {
-//							PrintWriter out = new PrintWriter(server.getOutputStream());
-//							out.println("GETIMG " + id);
-//							out.close();
-//							BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
-//							while(!in.ready()) {}
-//							String st = in.readLine();
-//							in.close();
-//							if(st.equalsIgnoreCase("null")) {
-//								System.out.print("got null img from server");
-//							}else {
-//								String[] args = st.split(" ");
-//								int size = Integer.parseInt(args[1]);
-//								byte[] img = new byte[size];
-//								server.getInputStream().read(img);
-//								cache.get(id).setImg(img);
-//								//stuff.imageReceived(cache.get(Integer.valueOf(id)), Flag.getBitmap(img));
-//								img = null;
-//								//TODO call image received
-//							}
-//						} catch (IOException e) {
-//							// TODO Auto-generated catch block
-//							e.printStackTrace();
-//						}
-//
-//					}
-//				};
-//				this.addTask(r);
-//			}else {
-//				Flag f = cache.get(id);
-//				//stuff.imageReceived(cache.get(Integer.valueOf(id)), Flag.getBitmap(f.getImg()));
-//			}
-//
-//		}else{
-//			System.out.println("Tried to find an image for a flag thats not there.");
-//		}
-//	}
+	public void getImage(final int id) {
+		if(this.cache.containsKey(Integer.valueOf(id))) {
+			if(this.cache.get(Integer.valueOf(id)).isntSet()) {
+				Runnable r = new Runnable() {
+
+					@Override
+					public void run() {
+						try {
+							PrintWriter out = new PrintWriter(server.getOutputStream());
+							out.println("GETIMG " + id);
+							out.flush();
+							out = null;
+							BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
+							while(!in.ready()) {}
+							String st = in.readLine();
+							//in.close();
+							in = null;
+							if(st.equalsIgnoreCase("null")) {
+								System.out.print("got null img from server");
+							}else {
+								String[] args = st.split(" ");
+								int size = Integer.parseInt(args[1]);
+								byte[] img = new byte[size];
+								server.getInputStream().read(img);
+								cache.get(id).setImg(img);
+								//stuff.imageReceived(cache.get(Integer.valueOf(id)), Flag.getBitmap(img));
+								img = null;
+								//TODO call image received
+							}
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+
+					}
+				};
+				this.addTask(r);
+			}else {
+				Flag f = cache.get(id);
+				//stuff.imageReceived(cache.get(Integer.valueOf(id)), Flag.getBitmap(f.getImg()));
+			}
+
+		}else{
+			System.out.println("Tried to find an image for a flag thats not there.");
+		}
+	}
 	private void connectToServer() {
 		Runnable r = new Runnable() {
 
@@ -223,10 +283,11 @@ public class ConnectionManager{
 					server = new Socket(hostname, port);
 					System.out.println("Connected to server.");
 					pool.execute(getKeepAliveTask());
+					pool.execute(getCheckTask());
 					pool.execute(getRunner());
 				}catch(IOException e) {
 					e.printStackTrace();
-					stuff.cannotConnectToServer();
+					CodeStuff.cannotConnectToServer();
 					System.out.println("Failed to connect to server. Retrying in 3s. ");
 					try {
 						Thread.sleep(3000L);
@@ -250,20 +311,21 @@ public class ConnectionManager{
 			public void run() {
 				try {
 					PrintWriter out = new PrintWriter(server.getOutputStream());
-					out.write("CHECK " + username + " " + password);
-					out.close();
+					out.println("CHECK " + username + " " + password);
+					out.flush();
+					out = null;
 					BufferedReader read = new BufferedReader(new InputStreamReader(server.getInputStream()));
 					while(true) {
 						String s = read.readLine();
 						if(s != null) {
 							if(s.equalsIgnoreCase("true")) {
-								read.close();
-								stuff.userVerified();
+								read = null;
+								CodeStuff.userVerified();
 							}else if(s.equalsIgnoreCase("false")) {
-								read.close();
-								stuff.userNotVerifed();
+								read = null;
+								CodeStuff.userNotVerifed();
 							}else {
-								read.close();
+								read = null;
 								System.out.println("got weird response from server.");
 							}
 						}
@@ -278,30 +340,37 @@ public class ConnectionManager{
 
 	}
 	public void newUser(final String username,final String password,final String email) {
+		System.out.println("user being created");
 		if(!verifyEmail(email)) {
-			this.stuff.userFailedRegistration("Invalid email.");
+			CodeStuff.userFailedRegistration("Invalid email.");
+			System.out.println("User failed registration.");
 			return;
 		}
 		Runnable r = new Runnable() {
 			@Override
 			public void run() {
 				try {
+					System.out.println("stuff");
 					PrintWriter out = new PrintWriter(server.getOutputStream());
-					out.write("NU " + username + " " + email + " " + password);
-					out.close();
+					out.println("NU " + username + " " + email + " " + password);
+					out.flush();
+					out = null;
+					System.out.println("Sent data..");
 					BufferedReader read = new BufferedReader(new InputStreamReader(server.getInputStream()));
 					while(true) {
 						String s = read.readLine();
 						if(s != null) {
+							System.out.println("Got server response: " + s);
 							if(s.equalsIgnoreCase("true")) {
-								stuff.userRegistered();
+								CodeStuff.userRegistered();
 							}else if(s.startsWith("FALSE")) {
 								String[] st = s.split(":");
-								stuff.userFailedRegistration(st[1]);
+								CodeStuff.userFailedRegistration(st[1]);
+								System.out.println("User failed registration: " + st[1]);
 							}else {
 								System.out.println("got weird response from server.");
 							}
-							read.close();
+							read = null;
 							break;
 						}
 					}
@@ -321,7 +390,6 @@ public class ConnectionManager{
 			public void run() {
 				try {
 					while(true) {
-					if(System.currentTimeMillis() - lastComm >= commrec) {
 							Runnable r = new Runnable() {
 
 								@Override
@@ -331,7 +399,8 @@ public class ConnectionManager{
 										out = new PrintWriter(server.getOutputStream(), true);
 										out.println("KEP");
 										lastComm = System.currentTimeMillis();
-										out.close();
+										out.flush();
+										out = null;
 									} catch (IOException e) {
 										// TODO Auto-generated catch block
 										e.printStackTrace();
@@ -339,7 +408,7 @@ public class ConnectionManager{
 								}
 							};
 							addTask(r);
-						}
+						Thread.sleep(commrec);
 						if(appClosed) {
 							break;
 						}

@@ -11,10 +11,11 @@ public class SignUp extends AppCompatActivity {
 
     private Button next;
     private EditText username,email,pass1,passTrue;
-
+    private String user;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        CodeStuff.setSignupReference(this);
         setContentView(R.layout.activity_sign_up);
         addListenerOnButton();
     }
@@ -36,7 +37,9 @@ public class SignUp extends AppCompatActivity {
                 String passT=passTrue.getText().toString();
 
                 if (passO.equals(passT)) {
-                    startActivity(new Intent(SignUp.this, MapsActivity.class));
+                    user= username.getText().toString();
+                    CodeStuff.registerUser(user, email.getText().toString(), passO);
+
                 } else{
                     pass1.setText("");
                     passTrue.setText("");
@@ -44,5 +47,16 @@ public class SignUp extends AppCompatActivity {
 
             }
         });
+    }
+    public void userRegistered(){
+        ConnectionManager.user = user;
+        System.out.println("User registered.");
+        startActivity(new Intent(SignUp.this, MapsActivity.class));
+    }
+    public void userFailedRegistration(String error){
+        username.setText("");
+        pass1.setText("");
+        passTrue.setText("");
+        System.out.println("User failed registration: " + error);
     }
 }
