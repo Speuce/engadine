@@ -11,18 +11,22 @@ import android.widget.ImageView;
 public class ShowPhoto extends AppCompatActivity {
 
     ImageView iv;
-    Bitmap bitmap;
+    //Bitmap bitmap;
     Button back;
+    private int id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        CodeStuff.setPhotoReference(this);
         setContentView(R.layout.activity_show_photo);
         Bundle extras = getIntent().getExtras();
-        bitmap = (Bitmap) extras.getParcelable("IMAGE");
+        id = extras.getInt("ID");
+        CodeStuff.requestImage(id);
+        //bitmap = (Bitmap) extras.getParcelable("IMAGE");
 
         iv = (ImageView)findViewById(R.id.image);
-        iv.setImageBitmap(bitmap);
+        //iv.set
 
         back = (Button)findViewById(R.id.back);
 
@@ -36,8 +40,11 @@ public class ShowPhoto extends AppCompatActivity {
             }
         });
 
-
-
+    }
+    public void setImage(Bitmap b, int id){
+        if(this.id == id){
+            iv.setImageBitmap(b);
+        }
 
     }
 }

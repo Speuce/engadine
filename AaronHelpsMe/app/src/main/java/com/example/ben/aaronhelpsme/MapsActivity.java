@@ -1,12 +1,16 @@
 package com.example.ben.aaronhelpsme;
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.location.Location;
+import android.location.LocationListener;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -20,8 +24,10 @@ import java.util.*;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -40,24 +46,32 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     boolean mark = false;
     String newString, disaster, comment;
     Bitmap bitmap;
-
-
+    private Map<String, BitmapDescriptor> descriptors;
+    private List<Flag> fires;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
-
-        gpsTracker = new GPSTracker(getApplicationContext());
-        mLocation = gpsTracker.getLocation();
-
-        latitude = mLocation.getLatitude();
-        longitude = mLocation.getLongitude();
-
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        MapsInitializer.initialize(getApplicationContext());
+
+        fires = new ArrayList<Flag>();
+        ConnectionManager.updateActivity(this);
+        descriptors = new HashMap<String, BitmapDescriptor>();
+        this.makeDescriptors();
+
+
+//
+//        gpsTracker = new GPSTracker(getApplicationContext());
+//        mLocation = gpsTracker.getLocation();
+
+
+
+        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+
         if (savedInstanceState == null) {
             Bundle extras = getIntent().getExtras();
             if(extras == null) {
@@ -73,24 +87,139 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             newString= (String) savedInstanceState.getSerializable("STRING_I_NEED");
             disaster= (String) savedInstanceState.getSerializable("DISASTER");
         }
+        CodeStuff.getCon().loadFlags(false);
 
+
+    }
+    public void makeDescriptors(){
+        loadDescriptor("fire");
+        loadDescriptor("flood");
+        loadDescriptor("earthquake");
+        loadDescriptor("tornado");
+        loadDescriptor("hurricane");
+        loadDescriptor("avalanche");
+        loadDescriptor("accident");
+        loadDescriptor("windstorm");
+        loadDescriptor("riot");
+        loadDescriptor("icestorm");
+        loadDescriptor("volcano");
+        loadDescriptor("tsunami");
+
+    }
+    private void loadDescriptor(String s){
+        this.descriptors.put(s, getDescriptor(s));
+    }
+    public BitmapDescriptor getIcon(String s){
+        if(this.descriptors.containsKey(s)){
+            return descriptors.get(s);
+        }else{
+            return BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED);
+        }
+    }
+
+    private BitmapDescriptor getDescriptor(String s){
+        switch (s){
+            case "fire":
+                BitmapDrawable bitmapdraw = (BitmapDrawable)getResources().getDrawable(R.drawable.fire);
+                Bitmap b = bitmapdraw.getBitmap();
+                Bitmap smallMarker = Bitmap.createScaledBitmap(b,84, 84, false);
+                return BitmapDescriptorFactory.fromBitmap(smallMarker);
+            case "flood":
+                BitmapDrawable bitmapdraw1 = (BitmapDrawable)getResources().getDrawable((R.drawable.flood));
+                Bitmap b1 = bitmapdraw1.getBitmap();
+                Bitmap smallMarker1 = Bitmap.createScaledBitmap(b1,84, 84, false);
+                return BitmapDescriptorFactory.fromBitmap(smallMarker1);
+            case "earthquake":
+                BitmapDrawable bitmapdraw2 = (BitmapDrawable)getResources().getDrawable(R.drawable.earthquake);
+                Bitmap b2 = bitmapdraw2.getBitmap();
+                Bitmap smallMarker2 = Bitmap.createScaledBitmap(b2,84, 84, false);
+                return BitmapDescriptorFactory.
+                        fromBitmap(smallMarker2);
+            case "accident":
+                return BitmapDescriptorFactory.
+                        defaultMarker(BitmapDescriptorFactory.HUE_GREEN);
+            case "icestorm":
+                BitmapDescriptorFactory.
+                        defaultMarker(BitmapDescriptorFactory.HUE_CYAN);
+            case "hurricane":
+                return BitmapDescriptorFactory.
+                        defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA);
+            case "tornado":
+                BitmapDrawable bitmapdraw3 = (BitmapDrawable)getResources().getDrawable((R.drawable.tornado));
+                Bitmap b3 = bitmapdraw3.getBitmap();
+                Bitmap smallMarker3 = Bitmap.createScaledBitmap(b3,384, 84, false);
+                return BitmapDescriptorFactory.
+                        fromBitmap(smallMarker3);
+            case "windstorm":
+                return BitmapDescriptorFactory.
+                        defaultMarker(BitmapDescriptorFactory.HUE_ROSE);
+            case "volcano":
+                BitmapDrawable bitmapdraw4 = (BitmapDrawable)getResources().getDrawable(R.drawable.lcano);
+                Bitmap b4 = bitmapdraw4.getBitmap();
+                Bitmap smallMarker4 = Bitmap.createScaledBitmap(b4,84, 84, false);
+                return BitmapDescriptorFactory.
+                        fromBitmap(smallMarker4);
+            case "avalanche":
+                BitmapDrawable bitmapdraw5 = (BitmapDrawable)getResources().getDrawable((R.drawable.avalanche));
+                Bitmap b5= bitmapdraw5.getBitmap();
+                Bitmap smallMarker5 = Bitmap.createScaledBitmap(b5,84, 84, false);
+                return BitmapDescriptorFactory.
+                        fromBitmap(smallMarker5);
+            case "tsunami":
+                BitmapDrawable bitmapdraw6 = (BitmapDrawable)getResources().getDrawable(R.drawable.tsunami);
+                Bitmap b6 = bitmapdraw6.getBitmap();
+                Bitmap smallMarker6 = Bitmap.createScaledBitmap(b6,84, 84, false);
+                return BitmapDescriptorFactory.
+                        fromBitmap(smallMarker6);
+            case "riot":
+                return BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN);
+            default:
+                return BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED);
+        }
 
 
     }
 
-
+    public void addMarker(Flag f){
+        final LatLng sydney = new LatLng(f.getLat(), f.getLon());
+        String disaster = f.getDisaster();
+        if(disaster.equals("fire")){
+            fires.add(f);
+        }
+        f.setMarker(mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(getIcon(disaster))
+                .snippet(f.getComment())));
+    }
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
+       // Location currentLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+       // latitude = currentLocation.getLatitude();
+       // longitude = currentLocation.getLongitude();
+        //latitude = mLocation.getLatitude();
+        //longitude = mLocation.getLongitude();
 
+        this.mMap = googleMap;
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED)
+            mMap.setMyLocationEnabled(true);
+        mMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
+            @Override
+            public void onMyLocationChange(Location arg0) {
+                // TODO Auto-generated method stub
+                latitude = arg0.getLatitude();
+                longitude = arg0.getLongitude();
+            }
+        });
+
+        CodeStuff.getCon().getFlags();
 
         final LatLng sydney = new LatLng(latitude, longitude);
+        System.out.println("Lat: " + latitude + " long: " + longitude);
         ArrayList <Point> flood = new ArrayList<>();
 
         // Add a marker in Sydney and move the camera
         float zoomLevel = 14.0f; //This goes up to 21
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, zoomLevel));
-
+        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         addMarker = (Button) findViewById(R.id.add);
 //        MarkerOptions markerOpt = new MarkerOptions();
 
@@ -100,210 +229,71 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onClick(View view) {
 
                 Intent in = new Intent(MapsActivity.this, MarkerAdd.class);
+                in.putExtra("lat", latitude);
+                in.putExtra("lon", longitude);
                 startActivity(in);
             }
         });
-        if(newString!=null){
+       // mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(getIcon(disaster))
+       //         .snippet(comment));
+        mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsActivity.this));
 
-            if(disaster.equals("flood")) {
-                BitmapDrawable bitmapdraw = (BitmapDrawable)getResources().getDrawable((R.drawable.flood));
-                Bitmap b = bitmapdraw.getBitmap();
-                Bitmap smallMarker = Bitmap.createScaledBitmap(b,84, 84, false);
-                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.
-                        fromBitmap(smallMarker)).snippet(comment));
-                mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsActivity.this));
-
-                mMap.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
-                    @Override
-                    public void onInfoWindowClick(Marker marker) {
-                        Intent in = new Intent(MapsActivity.this, ShowPhoto.class);
-                        in.putExtra("IMAGE", bitmap);
-                        startActivity(in);
-                    }
-                });
-                flood.add(new Point(latitude, longitude));
-            } else if(disaster.equals("fire")){
-                BitmapDrawable bitmapdraw = (BitmapDrawable)getResources().getDrawable(R.drawable.fire);
-                Bitmap b = bitmapdraw.getBitmap();
-                Bitmap smallMarker = Bitmap.createScaledBitmap(b,84, 84, false);
-                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.
-                        fromBitmap(smallMarker)).snippet(comment));
-                mMap.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
-                    @Override
-                    public void onInfoWindowClick(Marker marker) {
-                        Intent in = new Intent(MapsActivity.this, ShowPhoto.class);
-                        in.putExtra("IMAGE", bitmap);
-                        startActivity(in);
-                    }
-                });
-                mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsActivity.this));
-
-            } else if(disaster.equals("earthquake")){
-                BitmapDrawable bitmapdraw = (BitmapDrawable)getResources().getDrawable(R.drawable.earthquake);
-                Bitmap b = bitmapdraw.getBitmap();
-                Bitmap smallMarker = Bitmap.createScaledBitmap(b,84, 84, false);
-                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.
-                        fromBitmap(smallMarker)).snippet(comment));
-                mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsActivity.this));
-
-            } else if(disaster.equals("accident")){
-                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.
-                        defaultMarker(BitmapDescriptorFactory.HUE_GREEN)).snippet(comment));
-                mMap.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
-                    @Override
-                    public void onInfoWindowClick(Marker marker) {
-                        Intent in = new Intent(MapsActivity.this, ShowPhoto.class);
-                        in.putExtra("IMAGE", bitmap);
-                        startActivity(in);
-                    }
-                });
-                mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsActivity.this));
-
-            }else if(disaster.equals("icestorm")){
-                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.
-                        defaultMarker(BitmapDescriptorFactory.HUE_CYAN)).snippet(comment));
-                mMap.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
-                    @Override
-                    public void onInfoWindowClick(Marker marker) {
-                        Intent in = new Intent(MapsActivity.this, ShowPhoto.class);
-                        in.putExtra("IMAGE", bitmap);
-                        startActivity(in);
-                    }
-                });
-                mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsActivity.this));
-
-            }else if(disaster.equals("tornado")){
-                BitmapDrawable bitmapdraw = (BitmapDrawable)getResources().getDrawable((R.drawable.tornado));
-                Bitmap b = bitmapdraw.getBitmap();
-                Bitmap smallMarker = Bitmap.createScaledBitmap(b,84, 84, false);
-                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.
-                        fromBitmap(smallMarker)).snippet(comment));
-                mMap.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
-                    @Override
-                    public void onInfoWindowClick(Marker marker) {
-                        Intent in = new Intent(MapsActivity.this, ShowPhoto.class);
-                        in.putExtra("IMAGE", bitmap);
-                        startActivity(in);
-                    }
-                });
-                mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsActivity.this));
-
-            }else if(disaster.equals("hurricane")){
-                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.
-                        defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA)).snippet(comment));
-                mMap.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
-                    @Override
-                    public void onInfoWindowClick(Marker marker) {
-                        Intent in = new Intent(MapsActivity.this, ShowPhoto.class);
-                        in.putExtra("IMAGE", bitmap);
-                        startActivity(in);
-                    }
-                });
-                mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsActivity.this));
-            }else if(disaster.equals("windstorm")){
-                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.
-                        defaultMarker(BitmapDescriptorFactory.HUE_ROSE)).snippet(comment));
-                mMap.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
-                    @Override
-                    public void onInfoWindowClick(Marker marker) {
-                        Intent in = new Intent(MapsActivity.this, ShowPhoto.class);
-                        in.putExtra("IMAGE", bitmap);
-                        startActivity(in);
-                    }
-                });
-                mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsActivity.this));
-            }else if(disaster.equals("volcano")){
-                BitmapDrawable bitmapdraw = (BitmapDrawable)getResources().getDrawable(R.drawable.lcano);
-                Bitmap b = bitmapdraw.getBitmap();
-                Bitmap smallMarker = Bitmap.createScaledBitmap(b,84, 84, false);
-                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.
-                        fromBitmap(smallMarker)).snippet(comment));
-                mMap.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
-                    @Override
-                    public void onInfoWindowClick(Marker marker) {
-                        Intent in = new Intent(MapsActivity.this, ShowPhoto.class);
-                        in.putExtra("IMAGE", bitmap);
-                        startActivity(in);
-                    }
-                });
-                mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsActivity.this));
-            }else if(disaster.equals("avalanche")){
-                BitmapDrawable bitmapdraw = (BitmapDrawable)getResources().getDrawable((R.drawable.avalanche));
-                Bitmap b = bitmapdraw.getBitmap();
-                Bitmap smallMarker = Bitmap.createScaledBitmap(b,84, 84, false);
-                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.
-                        fromBitmap(smallMarker)).snippet(comment));
-                mMap.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
-                    @Override
-                    public void onInfoWindowClick(Marker marker) {
-                        Intent in = new Intent(MapsActivity.this, ShowPhoto.class);
-                        in.putExtra("IMAGE", bitmap);
-                        startActivity(in);
-                    }
-                });
-                mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsActivity.this));
-            }else if(disaster.equals("tsunami")){
-                BitmapDrawable bitmapdraw = (BitmapDrawable)getResources().getDrawable(R.drawable.tsunami);
-                Bitmap b = bitmapdraw.getBitmap();
-                Bitmap smallMarker = Bitmap.createScaledBitmap(b,84, 84, false);
-                mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.
-                        fromBitmap(smallMarker)).snippet(comment));
-                mMap.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
-                    @Override
-                    public void onInfoWindowClick(Marker marker) {
-                        Intent in = new Intent(MapsActivity.this, ShowPhoto.class);
-                        in.putExtra("IMAGE", bitmap);
-                        startActivity(in);
-                    }
-                });
-                mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsActivity.this));
-            }else if(disaster.equals("riot")){
-               mMap.addMarker(new MarkerOptions().position(sydney).title(disaster).icon(BitmapDescriptorFactory.
-                       defaultMarker(BitmapDescriptorFactory.HUE_GREEN)).snippet(comment));
-                mMap.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
-                    @Override
-                    public void onInfoWindowClick(Marker marker) {
-                        Intent in = new Intent(MapsActivity.this, ShowPhoto.class);
-                        in.putExtra("IMAGE", bitmap);
-                        startActivity(in);
-                    }
-                });
-                mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsActivity.this));
-
+        mMap.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+                Intent in = new Intent(MapsActivity.this, ShowPhoto.class);
+                //in.putExtra("IMAGE", bitmap);
+                in.putExtra("ID", CodeStuff.getCon().getFlag(marker).getId());
+                startActivity(in);
             }
-            System.out.print(disaster);
+        });
+        ArrayList<Point> points = new ArrayList<Point>();
+        for(Flag f: fires){
+            points.add(new Point(f.getLon(), f.getLat()));
+        }
+        List<Point> hull = calculateConcaveHull(points, 3);
 
+        PolygonOptions ops = new PolygonOptions();
+        int x = 0;
+        for(Point p: hull){
+            x++;
+           ops.add(new LatLng(p.getY(), p.getX()));
+        }
+        if(x >= 3){
+            Polygon polygon = mMap.addPolygon(ops.strokeColor(Color.BLACK).fillColor(Color
+                    .argb(20, 200, 0, 0)));
         }
 
-        int count = 30;
+
+        //int count = 30;
 
 //        points.add(new Point(sydney.longitude,sydney.latitude));
 
         // just a test with random points
-        Random rand = new Random();
-        for (int i =1; i<count; i++){
-            flood.add(new Point((double)Math.random()*2+latitude,(double)Math.random()*2+longitude));
-        }
-
-        ArrayList<Point> temp = calculateConcaveHull(flood,3);
-
-        ArrayList<LatLng> temp2 = new ArrayList<LatLng>();
-
-        for (int i =0; i<temp.size();i++){
-            temp2.add(new LatLng(temp.get(i).getX(),temp.get(i).getY()));
-        }
-
-        PolygonOptions opts=new PolygonOptions();
-
-        for (LatLng location : temp2) {
-            opts.add(location);
-        }
-
-        drawShape(temp2);
-        for (int i =0; i<flood.size(); i++) {
-//            mMap.addMarker(new MarkerOptions().position(new LatLng(points.get(i).getX(),points.get(i).getY())).title(disaster));
-        System.out.println("Running");
-        }
+//        Random rand = new Random();
+//        for (int i =1; i<count; i++){
+//            flood.add(new Point((double)Math.random()*2+latitude,(double)Math.random()*2+longitude));
+//        }
+//
+//        ArrayList<Point> temp = calculateConcaveHull(flood,3);
+//
+//        ArrayList<LatLng> temp2 = new ArrayList<LatLng>();
+//
+//        for (int i =0; i<temp.size();i++){
+//            temp2.add(new LatLng(temp.get(i).getX(),temp.get(i).getY()));
+//        }
+//
+//        PolygonOptions opts=new PolygonOptions();
+//
+//        for (LatLng location : temp2) {
+//            opts.add(location);
+//        }
+//
+//        drawShape(temp2);
+//        for (int i =0; i<flood.size(); i++) {
+////            mMap.addMarker(new MarkerOptions().position(new LatLng(points.get(i).getX(),points.get(i).getY())).title(disaster));
+//        System.out.println("Running");
+//        }
 
     }
 

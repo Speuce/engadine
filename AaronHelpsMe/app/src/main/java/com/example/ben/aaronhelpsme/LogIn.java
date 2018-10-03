@@ -16,26 +16,18 @@ public class LogIn extends AppCompatActivity {
     private TextView Textv;
     private Button next;
     private EditText user,pass;
-
+    private String username;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
+        CodeStuff.setLoginReference(this);
         setContentView(R.layout.activity_login);
-
-
-
-
-
-
-
-
-
 
         addListenerOnButton();
 
     }
     public void addListenerOnButton() {
-
         user = (EditText) findViewById(R.id.enterUsername);
         pass = (EditText) findViewById(R.id.enterPassword);
 
@@ -44,16 +36,21 @@ public class LogIn extends AppCompatActivity {
         next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                    startActivity(new Intent(LogIn.this, MapsActivity.class));
-
-
-
-
-
+                    username = user.getText().toString();
+                    CodeStuff.verifyUser(username, pass.getText().toString());
+                    //startActivity(new Intent(LogIn.this, MapsActivity.class));
             }
         });
 
+
+    }
+    public void userVerified(){
+        ConnectionManager.user = this.username;
+        startActivity(new Intent(LogIn.this, MapsActivity.class));
+    }
+    public void userNotVerified(){
+        System.out.println("User not verified.");
+        pass.setText("");
     }
 
 }
